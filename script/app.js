@@ -14,21 +14,41 @@ function _parseMillisecondsIntoReadableTime(timestamp) {
 }
 // 5 TODO: maak updateSun functie
 const updateSun = (l) => {
-  document.querySelector('.js-sun').style.left = l + '%';
+  if (l > 100) {
+    document.querySelector('.js-sun').style.left = 100 + '%';
+  } else {
+    document.querySelector('.js-sun').style.left = l + '%';
+  }
   let b;
-  if (l > 50) {
-    b = 100 - (l % 50) * 2;
-  } else if (l >= 100 || l <= 0) {
+  if (l >= 100 || l <= 0) {
     b = 0;
+  } else if (l > 50) {
+    b = 100 - (l % 50) * 2;
   } else {
     b = l * 2;
   }
   document.querySelector('.js-sun').style.bottom = b + '%';
 };
+function addHours(numOfHours, date = new Date()) {
+  date.setTime(date.getTime() + numOfHours * 60 * 60 * 1000);
+
+  return date;
+}
+function checkTime(i) {
+  if (i < 0) {
+    document.getElementsByTagName('html')[0].classList.add('is-night');
+    document.querySelector('.js-time-left').innerHTML = '0';
+    document.querySelector('.js-sun').setAttribute('data-time', '');
+  } else {
+    document.getElementsByTagName('html')[0].classList.remove('is-night');
+    document.querySelector('.js-time-left').innerHTML = Math.floor(i / 60);
+  }
+}
 let seconds;
 // 4 Zet de zon op de juiste plaats en zorg ervoor dat dit iedere minuut gebeurt.
 let placeSunAndStartMoving = (totalMinutes, sunrise) => {
-  var date = new Date();
+  // var date = new Date();
+  var date = addHours(5);
   document
     .querySelector('.js-sun')
     .setAttribute('data-time', date.getHours() + ':' + date.getMinutes());
@@ -45,23 +65,20 @@ let placeSunAndStartMoving = (totalMinutes, sunrise) => {
   // We voegen ook de 'is-loaded' class toe aan de body-tag.
   document.querySelector('body').classList.add('is-loaded');
   // Vergeet niet om het resterende aantal minuten in te vullen.
-  document.querySelector('.js-time-left').innerHTML = Math.floor(
-    minutesLeft / 60
-  );
+  checkTime(minutesLeft);
   // Nu maken we een functie die de zon elke minuut zal updaten
   const interval = setInterval(() => {
-    date = new Date();
+    // date = new Date();
+    date = addHours(5);
     timenow = Math.floor(date.getTime() / 1000);
     minutesSunUp = timenow - sunrise;
     minutesLeft = totalMinutes - minutesSunUp;
-    document.querySelector('.js-time-left').innerHTML = Math.floor(
-      minutesLeft / 60
-    );
     document
       .querySelector('.js-sun')
       .setAttribute('data-time', date.getHours() + ':' + date.getMinutes());
-    console.log('test');
+    // console.log('test');
     updateSun(Math.floor(minutesSunUp / éénprocent));
+    checkTime(minutesLeft);
   }, 1000);
   // Bekijk of de zon niet nog onder of reeds onder is
   // Anders kunnen we huidige waarden evalueren en de zon updaten via de updateSun functie.
